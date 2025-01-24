@@ -12,7 +12,12 @@
 <script src="https://js.arcgis.com/4.25/"></script>
 
 <script>  
-  require(["esri/config", "esri/Map", "esri/views/MapView"], function(esriConfig, Map, MapView) {   esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurNNKOxZzGksmd9odtipfMrCKhlUL7auZpitHz5p7XawaMdGKgRj-ybuRoJSAruPYpDWR-xjlL7q9anX9RZTFi6okxC69vm5audoPUqPT0sW7pjDTbgRcCVVAXRgKb9D5H5zaPA-oqQHbW2uiKh62goj2P4dQaxFDXvd9fQndw_bQlfySRneTGOnFPmVwB9_RvZ5JnpllUQuKIwpIQdpgELv53GTcQB4NvHv5Kl6GAd44AT1_iYlozOde";});  
+  require([
+    "esri/config", 
+    "esri/Map", 
+    "esri/views/MapView"
+  ], function(esriConfig, Map, MapView) {   
+    esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurNNKOxZzGksmd9odtipfMrCKhlUL7auZpitHz5p7XawaMdGKgRj-ybuRoJSAruPYpDWR-xjlL7q9anX9RZTFi6okxC69vm5audoPUqPT0sW7pjDTbgRcCVVAXRgKb9D5H5zaPA-oqQHbW2uiKh62goj2P4dQaxFDXvd9fQndw_bQlfySRneTGOnFPmVwB9_RvZ5JnpllUQuKIwpIQdpgELv53GTcQB4NvHv5Kl6GAd44AT1_iYlozOde" 
   const map = new Map({ 
  basemap: "streets" // Basemap layer service 
  });
@@ -23,6 +28,9 @@
  zoom: 13, // Zoom level
  container: "viewDiv" // Div element
 });
+
+});
+
  </script>
 
 <style>  html,  body,  #viewDiv {  padding: 0;  margin: 0;  height: 100%;  width: 100%;  }  </style> 
@@ -30,9 +38,8 @@
 </head>
 
 <body>
-  <!--<h1>Hello, world!</h1>-->
-
+  
   <div id="viewDiv"></div> 
+
 </body>
 </html>
-AAPTxy8BH1VEsoebNVZXo8HurNNKOxZzGksmd9odtipfMrCKhlUL7auZpitHz5p7XawaMdGKgRj-ybuRoJSAruPYpDWR-xjlL7q9anX9RZTFi6okxC69vm5audoPUqPT0sW7pjDTbgRcCVVAXRgKb9D5H5zaPA-oqQHbW2uiKh62goj2P4dQaxFDXvd9fQndw_bQlfySRneTGOnFPmVwB9_RvZ5JnpllUQuKIwpIQdpgELv53GTcQB4NvHv5Kl6GAd44AT1_iYlozOde
