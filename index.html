@@ -60,95 +60,173 @@
             const graphicsLayer = new GraphicsLayer();
             map.add(graphicsLayer);
 
-            //popup for airports & heliports
-            const popupAirportsHeliports = {
-                title: "{Fac_Name}",
-                content: `
-                    <b>📍 Location:</b> {City}, {State_Name} <br>
-                    <b>🛫 Facility Type:</b> {Fac_Type} <br>
-                    <b>🏢 Ownership:</b> {Owner_Type} <br>
-                    <b>🗻 Elevation:</b> {Elevation} ft <br>
-                `
+            //point for LA Memorial Coliseum (Opening & Closing Ceremonies)
+            const point = {
+                type: "point",
+                longitude: -118.2866,
+                latitude: 34.0141
             };
 
-            //labels for airports
-            const airportLabels = {
-                symbol: {
-                    type: "text",
-                    color: "#FFFFFF",
-                    haloColor: "#000000",
-                    haloSize: "2px",
-                    font: {
-                        size: "12px",
-                        family: "Arial",
-                        weight: "bold"
-                    }
-                },
-                labelPlacement: "above-center",
-                labelExpressionInfo: {
-                    expression: "$feature.Fac_Name"
+            const simpleMarkerSymbol = {
+                type: "simple-marker",
+                style: "triangle",
+                color: [255, 0, 0], //neon red (Olympic flame)
+                size: 30,
+                outline: {
+                    color: [255, 215, 0], //gold outline
+                    width: 5
                 }
             };
 
-            //labels for heliports
-            const heliportLabels = {
-                symbol: {
-                    type: "text",
-                    color: "#FFD700", //gold color for visibility
-                    haloColor: "#000000",
-                    haloSize: "2px",
-                    font: {
-                        size: "12px",
-                        family: "Arial",
-                        weight: "bold"
-                    }
-                },
-                labelPlacement: "above-center",
-                labelExpressionInfo: {
-                    expression: "$feature.Fac_Name"
-                }
+            const popupTemplate = {
+                title: "{Name}",
+                content: "{Description}"
             };
 
-            //icons for airports & heliports
-            const rendererAirports = {
-                type: "simple",
-                symbol: {
-                    type: "picture-marker",
-                    url: "https://sounny.github.io/agol/outline_local_airport_black_24dp.png",
-                    width: "18px",
-                    height: "18px"
-                }
+            const attributes = {
+                Name: "LA Memorial Coliseum",
+                Description: "Historic stadium hosting the Opening & Closing Ceremonies for the 2028 Olympics. Hosted the 1932 & 1984 Olympics."
             };
 
-            const rendererHeliports = {
-                type: "simple",
-                symbol: {
-                    type: "picture-marker",
-                    url: "https://JoeyWillman.github.io/geog576lab2/helipad.png",
-                    width: "18px",
-                    height: "18px"
-                }
-            };
-
-            //airports layer
-            const usAirportsLayer = new FeatureLayer({
-                url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/US_Airports_Joey/FeatureServer",
-                outFields: ["Fac_Name", "City", "State_Name", "Fac_Type", "Owner_Type", "Elevation"],
-                popupTemplate: popupAirportsHeliports,
-                renderer: rendererAirports,
-                labelingInfo: [airportLabels], //labels for airports
-                definitionExpression: "Fac_Type = 'AIRPORT'"
+            const pointGraphic = new Graphic({
+                geometry: point,
+                symbol: simpleMarkerSymbol,
+                attributes: attributes,
+                popupTemplate: popupTemplate
             });
 
-            //heliports layer
-            const usHeliportsLayer = new FeatureLayer({
-                url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/US_Airports_Joey/FeatureServer",
-                outFields: ["Fac_Name", "City", "State_Name", "Fac_Type", "Owner_Type", "Elevation"],
-                popupTemplate: popupAirportsHeliports,
-                renderer: rendererHeliports,
-                labelingInfo: [heliportLabels], //labels for heliports
-                definitionExpression: "Fac_Type = 'HELIPORT'"
+            pointGraphic.zIndex = 1000;
+            graphicsLayer.add(pointGraphic);
+
+            //polyline for Olympic cycling route (Santa Monica to Downtown LA)
+            const polyline = {
+                type: "polyline",
+                paths: [
+                    [-118.4965, 34.0093], 
+                    [-118.4412, 34.0400],  
+                    [-118.3623, 34.0544],  
+                    [-118.2866, 34.0141]  
+                ]
+            };
+
+            const polylineSymbol = {
+                type: "simple-line",
+                color: [0, 0, 255], //bright blue
+                width: 6,
+                style: "dash"
+            };
+
+            const polylineGraphic = new Graphic({
+                geometry: polyline,
+                symbol: polylineSymbol,
+                attributes: { Name: "Olympic Cycling Route" },
+                popupTemplate: { title: "{Name}", content: "Proposed cycling time trial route from Santa Monica to Downtown LA for the 2028 Olympics." }
             });
+
+            polylineGraphic.zIndex = 1000;
+            graphicsLayer.add(polylineGraphic);
+
+            //polygon for SoFi Stadium (major soccer venue)
+            const polygon = {
+                type: "polygon",
+                rings: [
+                    [-118.3404, 33.9535], 
+                    [-118.3369, 33.9535], 
+                    [-118.3369, 33.9508], 
+                    [-118.3404, 33.9508], 
+                    [-118.3404, 33.9535] 
+                ]
+            };
+
+            const polygonSymbol = {
+                type: "simple-fill",
+                color: [0, 255, 0, 0.6], //neon green (soccer field)
+                outline: {
+                    color: [255, 255, 0], //yellow outline
+                    width: 4
+                }
+            };
+
+            const polygonGraphic = new Graphic({
+                geometry: polygon,
+                symbol: polygonSymbol,
+                attributes: { Name: "SoFi Stadium" },
+                popupTemplate: { title: "{Name}", content: "Soccer matches and other events for the 2028 Olympics will be held here." }
+            });
+
+            polygonGraphic.zIndex = 1000;
+            graphicsLayer.add(polygonGraphic);
+
+            //olympic venues feature layer
+            const olympicVenuesLayer = new FeatureLayer({
+                url: "https://services1.arcgis.com/0MSEUqKaxRlEPj5g/ArcGIS/rest/services/ProposedOlympicVenues_2028/FeatureServer/0",
+                outFields: ["Name", "Address", "PhoneNumber", "Website"],
+                popupTemplate: {
+                    title: "{Name}",
+                    content: "<b>📍 Address:</b> {Address} <br><b>📞 Phone:</b> {PhoneNumber} <br><b>🌐 Website:</b> <a href='{Website}' target='_blank'>Visit Here</a>"
+                }
+            });
+
+            map.add(olympicVenuesLayer);
+
+           //labels for airports
+const airportLabels = {
+    symbol: {
+        type: "text",
+        color: "#FFFFFF",
+        haloColor: "#000000",
+        haloSize: "2px",
+        font: {
+            size: "12px",
+            family: "Arial",
+            weight: "bold"
+        }
+    },
+    labelPlacement: "above-center",
+    labelExpressionInfo: {
+        expression: "$feature.Fac_Name"
+    }
+};
+
+//labels for helipads
+const heliportLabels = {
+    symbol: {
+        type: "text",
+        color: "#FFD700", //gold for visibility
+        haloColor: "#000000",
+        haloSize: "2px",
+        font: {
+            size: "12px",
+            family: "Arial",
+            weight: "bold"
+        }
+    },
+    labelPlacement: "above-center",
+    labelExpressionInfo: {
+        expression: "$feature.Fac_Name"
+    }
+};
+
+//update usAirportsLayer to include labels
+const usAirportsLayer = new FeatureLayer({
+    url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/US_Airports_Joey/FeatureServer",
+    outFields: ["Fac_Name", "City", "State_Name", "Fac_Type", "Owner_Type", "Elevation"],
+    popupTemplate: { title: "{Fac_Name}", content: "<b>📍 Location:</b> {City}, {State_Name}" },
+    renderer: { type: "simple", symbol: { type: "picture-marker", url: "https://sounny.github.io/agol/outline_local_airport_black_24dp.png", width: "18px", height: "18px" }},
+    definitionExpression: "Fac_Type = 'AIRPORT'",
+    labelingInfo: [airportLabels] //adds labels for airports
+});
+
+//update usHeliportsLayer to include labels
+const usHeliportsLayer = new FeatureLayer({
+    url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/US_Airports_Joey/FeatureServer",
+    outFields: ["Fac_Name", "City", "State_Name", "Fac_Type"],
+    popupTemplate: { title: "{Fac_Name}", content: "<b>📍 Location:</b> {City}, {State_Name}" },
+    renderer: { type: "simple", symbol: { type: "picture-marker", url: "https://JoeyWillman.github.io/geog576lab2/helipad.png", width: "18px", height: "18px" }},
+    definitionExpression: "Fac_Type = 'HELIPORT'",
+    labelingInfo: [heliportLabels] //adds labels for helipads
+});
+
 
             map.add(usAirportsLayer);
             map.add(usHeliportsLayer);
