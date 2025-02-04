@@ -1,84 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  
-  <title>GEOG 576 Lab 2</title>
- 
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="" />
+    <title>GEOG 576 Lab 2</title>
 
-  <!-- calls for arcgis api's css and js library-->
-  <link rel="stylesheet" href="https://js.arcgis.com/4.25/esri/themes/light/main.css">
-<script src="https://js.arcgis.com/4.25/"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="LA 2028 Olympic Venues and Transport Features" />
 
-<style>  html,  body,  #viewDiv {  padding: 0;  margin: 0;  height: 100%;  width: 100%;  }  </style> 
+    <!-- ArcGIS API for JavaScript -->
+    <link rel="stylesheet" href="https://js.arcgis.com/4.25/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.25/"></script>
 
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
 </head>
 
 <body>
-  
-  <div id="viewDiv"></div> 
 
-  <script>
-    require([
-      "esri/config",
-      "esri/Map",
-      "esri/views/MapView",
-      "esri/widgets/BasemapGallery",
-      "esri/widgets/Locate",
-      "esri/widgets/Search",
+    <div id="viewDiv"></div>
 
-    ], function(esriConfig, Map, MapView, BasemapGallery, Locate, Search) {
-      
-      //API key
-      esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurNNKOxZzGksmd9odtipfMrCKhlUL7auZpitHz5p7XawaMdGKgRj-ybuRoJSAruPYpDWR-xjlL7q9anX9RZTFi6okxC69vm5audoPUqPT0sW7pjDTbgRcCVVAXRgKb9D5H5zaPA-oqQHbW2uiKh62goj2P4dQaxFDXvd9fQndw_bQlfySRneTGOnFPmVwB9_RvZ5JnpllUQuKIwpIQdpgELv53GTcQB4NvHv5Kl6GAd44AT1_iYlozOde";
-      
-      //Create map
-      const map = new Map({
-        basemap: "national-geographic" //Default basemap
-      });
+    <script>
+        require([
+            "esri/config",
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/widgets/BasemapGallery",
+            "esri/widgets/Locate",
+            "esri/widgets/Search",
+            "esri/layers/GraphicsLayer",
+            "esri/Graphic",
+            "esri/layers/FeatureLayer"
+        ], function (esriConfig, Map, MapView, BasemapGallery, Locate, Search, GraphicsLayer, Graphic, FeatureLayer) {
 
-      //Create view
-      const view = new MapView({
-        container: "viewDiv",
-        map: map,
-        center: [-73.982238, 44.282662], //Longitude, latitude
-        zoom: 16 //Zoom level
-      });
+            //api key
+            esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurNNKOxZzGksmd9odtipfMrCKhlUL7auZpitHz5p7XawaMdGKgRj-ybuRoJSAruPYpDWR-xjlL7q9anX9RZTFi6okxC69vm5audoPUqPT0sW7pjDTbgRcCVVAXRgKb9D5H5zaPA-oqQHbW2uiKh62goj2P4dQaxFDXvd9fQndw_bQlfySRneTGOnFPmVwB9_RvZ5JnpllUQuKIwpIQdpgELv53GTcQB4NvHv5Kl6GAd44AT1_iYlozOde";
 
-      //Create widget
-      const basemapGallery = new BasemapGallery({
-        view: view 
-      });
+            //create map
+            const map = new Map({
+                basemap: "streets"
+            });
 
-      view.ui.add(basemapGallery, {
-        position: "top-right" 
-      });
+            //create view
+            const view = new MapView({
+                container: "viewDiv",
+                map: map,
+                center: [-118.078777, 33.996341], //centered on LA
+                zoom: 10
+            });
 
-            //Add Locate widget
-            const locateWidget = new Locate({
-        view: view, 
-        useHeadingEnabled: true, 
-        goToOverride: function(view, options) {
-          options.target.scale = 1500; 
-          return view.goTo(options.target);
-        }
-      });
-      view.ui.add(locateWidget, {
-        position: "bottom-left"
-      });
+            const graphicsLayer = new GraphicsLayer();
+            map.add(graphicsLayer);
 
-       //Add Search widget
-       const searchWidget = new Search({
-        view: view 
-      });
-      view.ui.add(searchWidget, {
-        position: "bottom-right"
-      });
+            //popup for airports & heliports
+            const popupAirportsHeliports = {
+                title: "{Fac_Name}",
+                content: `
+                    <b>📍 Location:</b> {City}, {State_Name} <br>
+                    <b>🛫 Facility Type:</b> {Fac_Type} <br>
+                    <b>🏢 Ownership:</b> {Owner_Type} <br>
+                    <b>🗻 Elevation:</b> {Elevation} ft <br>
+                `
+            };
 
-    });
-  </script>
+            //labels for airports
+            const airportLabels = {
+                symbol: {
+                    type: "text",
+                    color: "#FFFFFF",
+                    haloColor: "#000000",
+                    haloSize: "2px",
+                    font: {
+                        size: "12px",
+                        family: "Arial",
+                        weight: "bold"
+                    }
+                },
+                labelPlacement: "above-center",
+                labelExpressionInfo: {
+                    expression: "$feature.Fac_Name"
+                }
+            };
+
+            //labels for heliports
+            const heliportLabels = {
+                symbol: {
+                    type: "text",
+                    color: "#FFD700", //gold color for visibility
+                    haloColor: "#000000",
+                    haloSize: "2px",
+                    font: {
+                        size: "12px",
+                        family: "Arial",
+                        weight: "bold"
+                    }
+                },
+                labelPlacement: "above-center",
+                labelExpressionInfo: {
+                    expression: "$feature.Fac_Name"
+                }
+            };
+
+            //icons for airports & heliports
+            const rendererAirports = {
+                type: "simple",
+                symbol: {
+                    type: "picture-marker",
+                    url: "https://sounny.github.io/agol/outline_local_airport_black_24dp.png",
+                    width: "18px",
+                    height: "18px"
+                }
+            };
+
+            const rendererHeliports = {
+                type: "simple",
+                symbol: {
+                    type: "picture-marker",
+                    url: "https://JoeyWillman.github.io/geog576lab2/helipad.png",
+                    width: "18px",
+                    height: "18px"
+                }
+            };
+
+            //airports layer
+            const usAirportsLayer = new FeatureLayer({
+                url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/US_Airports_Joey/FeatureServer",
+                outFields: ["Fac_Name", "City", "State_Name", "Fac_Type", "Owner_Type", "Elevation"],
+                popupTemplate: popupAirportsHeliports,
+                renderer: rendererAirports,
+                labelingInfo: [airportLabels], //labels for airports
+                definitionExpression: "Fac_Type = 'AIRPORT'"
+            });
+
+            //heliports layer
+            const usHeliportsLayer = new FeatureLayer({
+                url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/US_Airports_Joey/FeatureServer",
+                outFields: ["Fac_Name", "City", "State_Name", "Fac_Type", "Owner_Type", "Elevation"],
+                popupTemplate: popupAirportsHeliports,
+                renderer: rendererHeliports,
+                labelingInfo: [heliportLabels], //labels for heliports
+                definitionExpression: "Fac_Type = 'HELIPORT'"
+            });
+
+            map.add(usAirportsLayer);
+            map.add(usHeliportsLayer);
+        });
+    </script>
 
 </body>
 </html>
